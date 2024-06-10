@@ -65,7 +65,7 @@
 <script setup>
 //导入
 import { ref,onBeforeMount} from 'vue'
-import { getPersonPageApi} from '../utils/requestApi'; 
+import { getPersonPageApi} from '../utils/userService'; 
 import { ElMessage } from 'element-plus'	
 
 //data

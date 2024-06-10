@@ -1,5 +1,5 @@
 <template>
-	转账记录
+	转账记录组件
 </template>
 
 <script setup>

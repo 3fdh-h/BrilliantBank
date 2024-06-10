@@ -8,6 +8,6 @@
 
 <style>
 body{
-		background-color: #c6e2ff;
+		background-image: url("../src/assets/images/bg.jpg");
 }
 </style>

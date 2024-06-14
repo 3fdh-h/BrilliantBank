@@ -1,13 +1,11 @@
+<template>
+    <router-view></router-view>
+</template>
 <script setup>
-
 </script>
 
-<template>
-  <router-view></router-view>
-</template>
-
 <style>
-body{
-		background-image: url("../src/assets/images/bg.jpg");
+body {
+    background-color: #FFFFF0;
 }
 </style>

@@ -22,7 +22,7 @@
             <div class="transfer-info">
                 <el-row>
                     <el-col :span="7">
-                        <h2>收款人</h2>
+                        <h2>收款方</h2>
                     </el-col>
                     <el-col :span="17" class="right-container">
                         <h3>{{transfer_info.receive_name}}</h3>
@@ -30,15 +30,15 @@
                 </el-row>
                 <el-row>
                     <el-col :span="7">
-                        <h2>收款账号</h2>
+                        <h2>商品</h2>
                     </el-col>
                     <el-col :span="17" class="right-container">
-                        <h3>{{transfer_info.receive_account}}</h3>
+                        <h3>{{transfer_info.commerce}}</h3>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="7">
-                        <h2>转账金额</h2>
+                        <h2>付款金额</h2>
                     </el-col>
                     <el-col :span="17" class="right-container">
                         <h3>￥{{transfer_info.amount}}</h3>
@@ -50,14 +50,6 @@
                     </el-col>
                     <el-col :span="17" class="right-container">
                         <h3>{{transfer_info.give_account}}</h3>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="7">
-                        <h2>备注</h2>
-                    </el-col>
-                    <el-col :span="17" class="right-container">
-                        <h3>{{transfer_info.remarks}}</h3>
                     </el-col>
                 </el-row>
             </div>
@@ -91,7 +83,7 @@
 <script setup>
 import { useRouter, useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
-import { transferApi } from "../utils/transferService";
+import { payApi } from "../utils/paymentService";
 import { ElMessage } from "element-plus";
 const router = useRouter();
 const route = useRoute();
@@ -100,19 +92,17 @@ let error_msg = ref(""); // 错误消息
 // 转账确认信息
 const transfer_info = ref({
     receive_name: "",
-    receive_account: "",
+    commerce: "",
     amount: 0,
     give_account: "",
-    remarks: "",
 });
 
 // 挂载时加载信息
 onMounted(() => {
     transfer_info.value.receive_name = route.query.receive_name;
-    transfer_info.value.receive_account = route.query.receive_account;
+    transfer_info.value.commerce = route.query.commerce;
     transfer_info.value.amount = route.query.amount;
     transfer_info.value.give_account = route.query.give_account;
-    transfer_info.value.remarks = route.query.memo;
 });
 
 const backToTra = () => {
@@ -125,22 +115,21 @@ const input_number = (key) => {
     }
 };
 const transfer_confirm = () => {
-    transferApi(
+    payApi(
         transfer_info.value.give_account,
         pay_pwd.value,
         transfer_info.value.amount,
-        transfer_info.value.remarks,
-        transfer_info.value.receive_account
+        transfer_info.value.receive_name
     ).then((response) => {
         if (response.data.success) {
-            ElMessage.success("转账成功");
+            ElMessage.success("支付成功");
             console.log(response.data.data.amount);
             router.push({
                 path: "/tranresult",
                 query: {
                     amount: response.data.data.amount,
                     type: response.data.data.type,
-                    name: response.data.data.name,
+                    name: transfer_info.value.receive_name,
                     time: response.data.data.time,
                     remarks: response.data.data.remarks,
                 },

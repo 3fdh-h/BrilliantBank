@@ -2,11 +2,10 @@
     <div>
         <el-header>
             <div class="title">
-                <!-- TODO 接口获取账户数量 -->
                 <el-icon>
                     <Money />
                 </el-icon>
-                账户(2个)
+                账户(<strong>{{account_num}}</strong>个)
             </div>
         </el-header>
         <el-main>
@@ -19,10 +18,19 @@
                     <div>
                         <strong>余额:</strong>{{ account.balance }}
                     </div>
+                    <div>
+                        <strong>今日已交易:</strong>{{account.todayAmount}}
+                    </div>
+                    <div>
+                        <strong>每日限额:</strong>{{account.limitAmount}}
+                    </div>
                     <div class="button-group">
-                        <el-button @click="this.$router.push">交易记录</el-button>
+                        <!-- TODO 点击跳转交易记录，带上该账户的信息 -->
+                        <el-button @click="tranrecord(account.account_no, account.balance)">交易记录</el-button>
+                        <!-- TODO 点击跳转转账，带上该账户信息 -->
                         <el-button @click="transfer()">转账</el-button>
-                        <el-button>存款</el-button>
+                        <!-- TODO 点击跳转存款，带上该账户信息 -->
+                        <el-button @click="save(account.account_no, account.balance)" >存款</el-button>
                     </div>
                 </el-card>
             </el-row>
@@ -33,27 +41,61 @@
 
 <script setup>
 import FootMenu from "../components/Footer.vue";
-import { useRouter} from "vue-router"
-const router = useRouter()
-// TODO获取账户信息 
-const account_data = [
-    {
-        account_no: "1234567890",
-        balance: 1000,
-        isPrimary: true,
-    },
-    {
-        account_no: "1234567891",
-        balance: 100,
-        isPrimary: false,
-    },
-];
+import { useRouter } from "vue-router";
+import { onMounted, ref } from "vue";
+import { getAccountList, addAccount } from "../utils/accountService";
+const router = useRouter();
+const account_data = ref([]); // 账户信息
+const account_num = ref(0); // 账户数量
+
+// 挂载时加载账户
+onMounted(() => {
+    console.log("挂载")
+    getAccountList().then((response) => {
+        if (response.data.success) {
+            console.log(response);
+            account_num.value = response.data.data.length;
+            console.log(account_num.value);
+            account_data.value = response.data.data.map((item) => {
+                return {
+                    account_no: item.name,
+                    balance: item.balance,
+                    isPrimary: item.isPrimary,
+                    todayAmount: item.transactionAmountToday,
+                    limitAmount: item.transactionLimitationDaily,
+                };
+            });
+        }
+    });
+});
+// 跳转交易记录
+const tranrecord = (acno, bal) => {
+    router.push({
+        path: '/transrecord',
+        query: {
+            account: acno,
+            friend_account: null,
+            balance: bal
+        }
+    })
+}
 
 // 跳转转账页面
 const transfer = () => {
     router.push({
         path: "/transfer",
     });
+};
+
+//跳转存款页面
+const save = (acno, bal) => {
+    router.push({
+        path: '/saving',
+        query:{
+            account: acno,
+            balance: bal
+        }
+    })
 }
 </script>
 

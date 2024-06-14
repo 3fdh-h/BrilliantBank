@@ -12,34 +12,34 @@
                 </el-col>
                 <el-col :span="5">
                 </el-col>
-                <span>向他人转账</span>
+                <span>账户间互转</span>
             </el-row>
             <el-divider />
         </el-header>
         <el-main>
             <div class="receive-info">
-                <el-row class="receive-person">
+                 <el-row class="receive-person">
                     <el-col :span="7">
                         <h1>收款账户</h1>
                     </el-col>
                     <el-col :span="17" class="right-container">
-                        <el-button type="primary" class="select-button" @click="this.$router.push('/transfer')">重新选择</el-button>
+                        <el-button type="primary" class="select-button" @click="ChooseAccount(true)">重新选择</el-button>
                     </el-col>
                 </el-row>
                 <el-row class="receive-name">
-                    <el-col :span="6">
-                        <h2>户名</h2>
-                    </el-col>
-                    <el-col :span="18" class="right-container">
-                        <h2>{{receiveOne.name}}</h2>
-                    </el-col>
-                </el-row>
-                <el-row class="receive-account">
                     <el-col :span="6">
                         <h2>账号</h2>
                     </el-col>
                     <el-col :span="18" class="right-container">
                         <h2>{{receiveOne.account}}</h2>
+                    </el-col>
+                </el-row>
+                <el-row class="receive-account">
+                    <el-col :span="7">
+                        <h2>余额</h2>
+                    </el-col>
+                    <el-col :span="17" class="right-container">
+                        <h2>￥{{receiveOne.balance}}</h2>
                     </el-col>
                 </el-row>
             </div>
@@ -72,7 +72,7 @@
                         <h1>付款账户</h1>
                     </el-col>
                     <el-col :span="17" class="right-container">
-                        <el-button type="primary" class="select-button" @click="ChooseAccount()">重新选择</el-button>
+                        <el-button type="primary" class="select-button" @click="ChooseAccount(false)">重新选择</el-button>
                     </el-col>
                 </el-row>
                 <el-row class="receive-name">
@@ -80,11 +80,9 @@
                         <h2>账号</h2>
                     </el-col>
                     <el-col :span="18" class="right-container">
-                        <!-- TODO 从来源获取用户信息 -->
                         <h2>{{giveOne.account}}</h2>
                     </el-col>
                 </el-row>
-                <!-- TODO 需要加一个限额 -->
                 <el-row class="receive-account">
                     <el-col :span="7">
                         <h2>可用余额</h2>
@@ -101,7 +99,6 @@
             <el-row></el-row>
             <el-row>
                 <div class="next-step">
-                    <!-- TODO  限额还未展示 -->
                     <el-button class="submit-button" bg @click="toCommit()" :disabled="isSubmitDisabled">下一步</el-button>
                 </div>
             </el-row>
@@ -111,7 +108,7 @@
         <h3>账户{{acc_num}}个</h3>
         <el-scrollbar height="40vw">
             <el-radio-group v-model="selectedAccount">
-                <el-radio v-for="(acc, index) in acc_data" :key="index" :label="acc.acc_no" border @click="changeAcc(acc)" class="account-radio">
+                <el-radio v-for="(acc, index) in acc_data" :key="index" :label="acc.acc_no" border @click="changeAcc(acc)" class="account-radio" :disabled="isDisabled(acc)">
                     <span>账号：{{ acc.acc_no }}</span>
                     <br />
                     <span>余额：{{ acc.balance }}</span>
@@ -125,9 +122,7 @@
         <template #footer>
             <div class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取消</el-button>
-                <el-button type="primary" @click="confirmAcc()">
-                    确认
-                </el-button>
+                <el-button type="primary" @click="confirmAcc()">确认</el-button>
             </div>
         </template>
     </el-dialog>
@@ -135,33 +130,32 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { onMounted, ref, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getAccountList } from "../utils/accountService";
+import { ElMessage } from "element-plus";
 const router = useRouter();
 const route = useRoute();
-// 转账的金额
-let transfer_amount = ref(null);
-// 备注
+// 收款方信息
+const receiveOne = ref({
+    name: "",
+    account: ""
+})
+// 支付信息
+let transfer_amount = ref(0);
 let transfer_memo = ref("");
 // 付款方
 const giveOne = ref({
     account: "",
     balance: 0,
 });
-// 收款方
-const receiveOne = ref({
-    name: "",
-    account: "",
-});
 let acc_num = ref(0); //账户数量
 // 所有账户数据
 const acc_data = ref([]);
-let dialogFormVisible = ref(false); // 表单可见性
+let dialogFormVisible = ref(false); // 表单
+let isSelectingReceiveAccount = ref(false); // 是否选择收款账户
 
 // 挂载时加载收款和付款信息
 onMounted(() => {
-    receiveOne.value.name = route.query.name;
-    receiveOne.value.account = route.query.account;
     // 填充付款账号，默认为主账户
     getAccountList().then((response) => {
         if (response.data.success) {
@@ -176,15 +170,16 @@ onMounted(() => {
 });
 // 返回转账界面
 const backToPre = () => {
-    router.push("/transfer");
+    router.back();
 };
 // 点击按钮填充输入框
 const fitAmount = (amount) => {
     transfer_amount.value = amount;
 };
 let selectedAccount = ref(null); // 选中的账户
-// 重选付款账户
-const ChooseAccount = () => {
+// 重选付款或收款账户
+const ChooseAccount = (isReceive) => {
+    isSelectingReceiveAccount.value = isReceive;
     dialogFormVisible.value = true;
     // 清空之前的账户数据
     acc_data.value = [];
@@ -193,8 +188,6 @@ const ChooseAccount = () => {
         console.log(response);
         if (response.data.success) {
             acc_num.value = response.data.data.length;
-            console.log(response.data.data.length);
-            console.log(acc_num);
             for (let i = 0; i < response.data.data.length; i++) {
                 acc_data.value.push({
                     acc_no: response.data.data[i].name,
@@ -208,22 +201,34 @@ const ChooseAccount = () => {
     });
 };
 
+// 检查账户是否需要禁用
+const isDisabled = (acc) => {
+    return isSelectingReceiveAccount.value ? acc.acc_no === giveOne.value.account : acc.acc_no === receiveOne.value.account;
+};
+
 // 选择单选框后
 const changeAcc = (acc) => {
-    giveOne.value.account = acc.acc_no;
-    giveOne.value.balance = acc.balance;
+    if (isSelectingReceiveAccount.value) {
+        receiveOne.value.account = acc.acc_no;
+        receiveOne.value.balance = acc.balance;
+    } else {
+        giveOne.value.account = acc.acc_no;
+        giveOne.value.balance = acc.balance;
+    }
 };
 // 确认单选框选择之后
 const confirmAcc = () => {
     dialogFormVisible.value = false;
-    console.log(giveOne.value.account);
 };
 // 计算属性来控制按钮的禁用状态
 const isSubmitDisabled = computed(() => {
     return (
         transfer_amount.value == null ||
         transfer_amount.value <= 0 ||
-        transfer_amount.value > giveOne.value.balance
+        transfer_amount.value > giveOne.value.balance ||
+        receiveOne.value.account == null ||
+        receiveOne.value.name == null ||
+        giveOne.value.account == receiveOne.value.account
     );
 });
 // 跳转确认转账
@@ -283,7 +288,6 @@ body {
     font-family: emoji;
     font-weight: 900;
 }
-/* 金额输入框样式 */
 .input-container {
     display: flex;
     align-items: center;
@@ -302,7 +306,6 @@ body {
     bottom: 0;
     left: 0;
 }
-/* TODO 单选样式部分问题 */
 .account-radio {
     width: 100%;
     height: 20vw;

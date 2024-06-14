@@ -75,14 +75,13 @@ const login = () => {
         loginApi(info.value.Name, info.value.Pwd)
             //回调函数
             .then((response) => {
-                if (response.data.result) {
+                if (response.data.success) {
                     //存储token
-                    sessionStorage.setItem("token", response.data.msg);
+                    sessionStorage.setItem("token", response.data.data.token);
                     sessionStorage.setItem(
                         "info",
-                        JSON.stringify(response.data.data)
+                        JSON.stringify(response.data.data.userId)
                     );
-                    localStorage.setItem("token", response.data.msg);
                     //提示框
                     ElMessage({
                         message: "登录成功",
@@ -93,8 +92,8 @@ const login = () => {
                 } else {
                     //提示框
                     ElMessage({
-                        message: response.data.message,
-                        type: "danger",
+                        message: response.data.msg,
+                        type: "error",
                     });
                 }
             })
@@ -103,7 +102,7 @@ const login = () => {
                 console.log(err);
                 ElMessage({
                     message: "服务器异常，请稍后再试",
-                    type: "danger",
+                    type: "error",
                 });
             });
     }
@@ -118,10 +117,10 @@ const checkName = () => {
     if (regName.test(info.value.Name)) {
         return true;
     } else if (info.value.Name == "") {
-        ElMessage.error("手机号不能为空");
+        ElMessage.warning("手机号不能为空");
         return false;
     } else {
-        ElMessage.error("手机号格式不正确");
+        ElMessage.warning("手机号格式不正确");
         return false;
     }
 };
@@ -130,10 +129,10 @@ const checkPwd = () => {
     if (regPwd.test(info.value.Pwd)) {
         return true;
     } else if (info.value.Pwd == "") {
-        ElMessage.error("密码不能为空");
+        ElMessage.warning("密码不能为空");
         return false;
     } else {
-        ElMessage.error("密码为8到16位的字母数字混合密码");
+        ElMessage.warning("密码为8到16位的字母数字混合密码");
         return false;
     }
 };

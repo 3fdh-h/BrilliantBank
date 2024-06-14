@@ -91,7 +91,7 @@
 <script setup>
 import { useRouter, useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
-import { transferApi } from "../utils/transferService";
+import { transferOutApi } from "../utils/transferService";
 import { ElMessage } from "element-plus";
 const router = useRouter();
 const route = useRoute();
@@ -125,11 +125,12 @@ const input_number = (key) => {
     }
 };
 const transfer_confirm = () => {
-    transferApi(
+    transferOutApi(
         transfer_info.value.give_account,
         pay_pwd.value,
         transfer_info.value.amount,
         transfer_info.value.remarks,
+        transfer_info.value.receive_name,
         transfer_info.value.receive_account
     ).then((response) => {
         if (response.data.success) {

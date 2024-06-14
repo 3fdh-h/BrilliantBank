@@ -12,41 +12,15 @@
                 </el-col>
                 <el-col :span="5">
                 </el-col>
-                <span>向他人转账</span>
+                <!-- TODO 根据不同入口展现不同文案 -->
+                <span>现金存款</span>
             </el-row>
             <el-divider />
         </el-header>
         <el-main>
-            <div class="receive-info">
-                <el-row class="receive-person">
-                    <el-col :span="7">
-                        <h1>收款账户</h1>
-                    </el-col>
-                    <el-col :span="17" class="right-container">
-                        <el-button type="primary" class="select-button" @click="this.$router.push('/transfer')">重新选择</el-button>
-                    </el-col>
-                </el-row>
-                <el-row class="receive-name">
-                    <el-col :span="6">
-                        <h2>户名</h2>
-                    </el-col>
-                    <el-col :span="18" class="right-container">
-                        <h2>{{receiveOne.name}}</h2>
-                    </el-col>
-                </el-row>
-                <el-row class="receive-account">
-                    <el-col :span="6">
-                        <h2>账号</h2>
-                    </el-col>
-                    <el-col :span="18" class="right-container">
-                        <h2>{{receiveOne.account}}</h2>
-                    </el-col>
-                </el-row>
-            </div>
-            <el-divider></el-divider>
             <div class="amount-input">
                 <el-row>
-                    <h2>转账金额</h2>
+                    <h2>存款金额</h2>
                 </el-row>
                 <el-row>
                     <div class="amount-button">
@@ -61,7 +35,8 @@
                         <h1>￥</h1>
                     </el-col>
                     <el-col :span="21">
-                        <el-input v-model="transfer_amount" type="number" placeholder="请输入金额" suffix-icon="Coin" style="height:10vw"></el-input>
+                        <!-- TODO max属性可以控制输入框的最大值 -->
+                        <el-input v-model="saving_amount" type="number" placeholder="请输入金额" suffix-icon="Coin" style="height:10vw"></el-input>
                     </el-col>
                 </el-row>
             </div>
@@ -69,9 +44,10 @@
             <div class="pay-account">
                 <el-row class="receive-person">
                     <el-col :span="7">
-                        <h1>付款账户</h1>
+                        <h1>存入账户</h1>
                     </el-col>
                     <el-col :span="17" class="right-container">
+                        <!-- TODO 点击后弹窗选择账户 -->
                         <el-button type="primary" class="select-button" @click="ChooseAccount()">重新选择</el-button>
                     </el-col>
                 </el-row>
@@ -81,16 +57,15 @@
                     </el-col>
                     <el-col :span="18" class="right-container">
                         <!-- TODO 从来源获取用户信息 -->
-                        <h2>{{giveOne.account}}</h2>
+                        <h2>{{saveOne.account}}</h2>
                     </el-col>
                 </el-row>
-                <!-- TODO 需要加一个限额 -->
                 <el-row class="receive-account">
                     <el-col :span="7">
                         <h2>可用余额</h2>
                     </el-col>
                     <el-col :span="17" class="right-container">
-                        <h2>￥{{giveOne.balance}}</h2>
+                        <h2>￥{{saveOne.balance}}</h2>
                     </el-col>
                 </el-row>
             </div>
@@ -101,12 +76,16 @@
             <el-row></el-row>
             <el-row>
                 <div class="next-step">
-                    <!-- TODO  限额还未展示 -->
-                    <el-button class="submit-button" bg @click="toCommit()" :disabled="isSubmitDisabled">下一步</el-button>
+                    <!-- TODO 下一步之前检查：
+                    1. 是否超过限额
+                    2. 余额是否够用 -->
+                    <!-- TODO 必填信息未填之前禁止下一步按钮 -->
+                    <el-button class="submit-button" bg @click="toCommit()" :disabled="isSubmitDisabled">存款</el-button>
                 </div>
             </el-row>
         </el-main>
     </el-container>
+    <!-- TODO 弹窗展示自己的所有账户 -->
     <el-dialog v-model="dialogFormVisible" title="选择账户" width="80vw">
         <h3>账户{{acc_num}}个</h3>
         <el-scrollbar height="40vw">
@@ -135,40 +114,38 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { onMounted, ref, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getAccountList } from "../utils/accountService";
+import { savingApi } from "../utils/savingService";
+import { ElMessage } from "element-plus";
 const router = useRouter();
 const route = useRoute();
-// 转账的金额
-let transfer_amount = ref(null);
-// 备注
-let transfer_memo = ref("");
-// 付款方
-const giveOne = ref({
+
+// 支付信息
+let saving_amount = ref(0);
+const transfer_memo = ref("");
+// 存款方
+const saveOne = ref({
     account: "",
     balance: 0,
-});
-// 收款方
-const receiveOne = ref({
-    name: "",
-    account: "",
 });
 let acc_num = ref(0); //账户数量
 // 所有账户数据
 const acc_data = ref([]);
-let dialogFormVisible = ref(false); // 表单可见性
+let dialogFormVisible = ref(false); // 表单
 
 // 挂载时加载收款和付款信息
 onMounted(() => {
-    receiveOne.value.name = route.query.name;
-    receiveOne.value.account = route.query.account;
+    // 路由获取信息
+    saveOne.value.account = route.query.account;
+    saveOne.value.balance = route.query.balance;
     // 填充付款账号，默认为主账户
     getAccountList().then((response) => {
         if (response.data.success) {
             for (let i = 0; i < response.data.data.length; i++) {
                 if (response.data.data[i].isPrimary == 1) {
-                    giveOne.value.account = response.data.data[i].name;
-                    giveOne.value.balance = response.data.data[i].balance;
+                    saveOne.value.account = response.data.data[i].name;
+                    saveOne.value.balance = response.data.data[i].balance;
                 }
             }
         }
@@ -176,11 +153,11 @@ onMounted(() => {
 });
 // 返回转账界面
 const backToPre = () => {
-    router.push("/transfer");
+    router.back();
 };
 // 点击按钮填充输入框
 const fitAmount = (amount) => {
-    transfer_amount.value = amount;
+    saving_amount.value = amount;
 };
 let selectedAccount = ref(null); // 选中的账户
 // 重选付款账户
@@ -193,8 +170,6 @@ const ChooseAccount = () => {
         console.log(response);
         if (response.data.success) {
             acc_num.value = response.data.data.length;
-            console.log(response.data.data.length);
-            console.log(acc_num);
             for (let i = 0; i < response.data.data.length; i++) {
                 acc_data.value.push({
                     acc_no: response.data.data[i].name,
@@ -210,33 +185,40 @@ const ChooseAccount = () => {
 
 // 选择单选框后
 const changeAcc = (acc) => {
-    giveOne.value.account = acc.acc_no;
-    giveOne.value.balance = acc.balance;
+    saveOne.value.account = acc.acc_no;
+    saveOne.value.balance = acc.balance;
 };
 // 确认单选框选择之后
 const confirmAcc = () => {
     dialogFormVisible.value = false;
-    console.log(giveOne.value.account);
+    console.log(saveOne.value.account);
 };
 // 计算属性来控制按钮的禁用状态
 const isSubmitDisabled = computed(() => {
-    return (
-        transfer_amount.value == null ||
-        transfer_amount.value <= 0 ||
-        transfer_amount.value > giveOne.value.balance
-    );
+    return saving_amount.value == null || saving_amount.value <= 0;
 });
-// 跳转确认转账
+// 跳转确认存款
 const toCommit = () => {
-    router.push({
-        path: "/trancommit",
-        query: {
-            receive_name: receiveOne.value.name,
-            receive_account: receiveOne.value.account,
-            give_account: giveOne.value.account,
-            amount: transfer_amount.value,
-            memo: transfer_memo.value,
-        },
+    savingApi(
+        saving_amount.value,
+        saveOne.value.account,
+        transfer_memo.value
+    ).then((response) => {
+        if (response.data.success) {
+            ElMessage.success("存款成功");
+            router.push({
+                path: "/tranresult",
+                query: {
+                    amount: response.data.data.amount,
+                    type: response.data.data.type,
+                    name: response.data.data.name,
+                    time: response.data.data.time,
+                    remarks: response.data.data.remarks,
+                },
+            });
+        } else {
+            ElMessage.error("存款失败" + response.data.msg);
+        }
     });
 };
 </script>

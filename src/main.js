@@ -7,7 +7,6 @@ import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'  // 导入Element图标
 //导入router.js
 import router from './router/router.js'
-
 // 导入axios
 import Axios from 'axios'
 import './styles/element-variables.scss'

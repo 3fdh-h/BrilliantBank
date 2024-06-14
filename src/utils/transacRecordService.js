@@ -1,13 +1,14 @@
 import axios from 'axios'
 
 //请求路径的前缀
-const baseUrl = 'https://localocalhost:8080/'
+// const baseUrl = 'https://localocalhost:8080/'
+const baseUrl = '/api'
 
 // 根据条件获取全部交易记录
 export const getRecordByCondApi = (type, accountName, friendAccountName, dateBegin, dateEnd) => {
     return axios({
-        url: `${baseUrl}/transaction/record`,
-        method: "get",
+        url: `${baseUrl}/transaction/record/`,
+        method: "post",
         data: {
             "type": type,
             "accountName": accountName,
@@ -17,7 +18,7 @@ export const getRecordByCondApi = (type, accountName, friendAccountName, dateBeg
         },
         headers: {
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`,
+            'token': `${sessionStorage.getItem("token")}`,
         }
     });
 }
@@ -32,7 +33,7 @@ export const getRecDetailApi = (id) => {
         },
         headers: {
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`,
+            'token': `${sessionStorage.getItem("token")}`,
         }
     });
 }
@@ -41,17 +42,18 @@ export const getRecDetailApi = (id) => {
 export const exportRecoApi = (type, accountName, friendAccountName, dateBegin, dateEnd) => {
     return axios({
         url: `${baseUrl}/transaction/record/export`,
-        method: "get",
+        method: "post",
         data: {
-            "type": 0,
-            "accountName": "",
-            "friendAccountName": "",
-            "dateBegin": "",
-            "dateEnd": ""
+            "type": type,
+            "accountName": accountName,
+            "friendAccountName": friendAccountName,
+            "dateBegin": dateBegin,
+            "dateEnd": dateEnd
         },
+        responseType: 'blob',
         headers: {
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`,
+            'token': `${sessionStorage.getItem("token")}`,
         }
     })
 }

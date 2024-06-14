@@ -1,6 +1,8 @@
 <template>
     <div class="occupy">
-        <div height="500px"></div>
+        <div height="500px">
+            <LogoVue />
+        </div>
     </div>
     <el-row class="title">
         <el-col :span="5"></el-col>
@@ -18,6 +20,17 @@
     </el-row>
     <el-row style="height: 10px;"></el-row>
     <el-row class="row">
+        <el-col :span="6" class="tips">性别</el-col>
+        <el-col :span="1"></el-col>
+        <el-col :span="14">
+            <el-select v-model="info.Gender" placeholder="请选择性别" clearable>
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
+            </el-select>
+        </el-col>
+    </el-row>
+    <el-row style="height: 10px;"></el-row>
+    <el-row class="row">
         <el-col :span="6" class="tips">手机号</el-col>
         <el-col :span="1"></el-col>
         <el-col :span="14">
@@ -25,7 +38,6 @@
         </el-col>
     </el-row>
     <el-row style="height: 10px;"></el-row>
-    <!-- TODO 点击获取验证码事件，弹窗展示后端返回的验证码 -->
     <el-row class="row">
         <el-col :span="6" class="tips">验证码</el-col>
         <el-col :span="1"></el-col>
@@ -33,8 +45,8 @@
             <el-input type="number" v-model="info.VerifyCode" placeholder="输入验证码" />
         </el-col>
         <el-col :span="7">
-            <el-button class="yzm" type="primary" @click="getVerCode()">
-                <span width>获取验证码</span>
+            <el-button class="yzm" type="primary" @click="getVerCode(info.Phone)">
+                <span>获取验证码</span>
             </el-button>
         </el-col>
     </el-row>
@@ -63,7 +75,7 @@
     <el-row class="row">
         <el-col :span="6"></el-col>
         <el-col :span="12">
-            <el-button style="color: black;  height: 32px; width: 190px;" type="primary" class="commit" @click="reg()">注册</el-button>
+            <el-button style="color: black;  height: 32px; width: 190px;" type="primary" class="commit" @click="reg(info.Name, info.Gender, info.Phone, info.VerifyCode, info.password)">注册</el-button>
         </el-col>
         <el-col :span="6"></el-col>
     </el-row>
@@ -80,14 +92,17 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { loginApi } from "../utils/userService";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { toFormData } from "axios";
+import LogoVue from "../components/Logo.vue";
+import { getVerCodeApi, regApi } from "../utils/userService";
 const router = useRouter();
 
 //与注册框 双向绑定
 let info = ref({
     Name: "",
+    Gender: "",
     Phone: "",
     VerifyCode: "",
     password: "",
@@ -106,10 +121,10 @@ const checkName = () => {
     if (regName.test(info.value.Name)) {
         return true;
     } else if (info.value.Name == "") {
-        ElMessage.error("姓名不能为空");
+        ElMessage.warning("姓名不能为空");
         return false;
     } else {
-        ElMessage.error("姓名必须为中文且不超过10个字符");
+        ElMessage.warning("姓名必须为中文且不超过10个字符");
         return flase;
     }
 };
@@ -118,10 +133,10 @@ const checkPhone = () => {
     if (regPhone.test(info.value.Phone)) {
         return true;
     } else if (info.value.Phone == "") {
-        ElMessage.error("手机号不能为空");
+        ElMessage.warning("手机号不能为空");
         return false;
     } else {
-        ElMessage.error("手机号格式错误");
+        ElMessage.warning("手机号格式错误");
         return false;
     }
 };
@@ -146,16 +161,53 @@ const checkTPwd = () => {
     }
 };
 
-// TODO 点击注册之后先检测输入框正确性，再请求接口
-const reg = () => {};
+const reg = (name, gender, phone, verificationCode, loginPassword) => {
+    if (checkName() && checkPhone() && checkPwd() && checkTPwd()) {
+        regApi(name, gender, phone, verificationCode, loginPassword).then(
+            (response) => {
+                if (response.data.success) {
+                    ElMessage.success("注册成功");
+                    router.push("/login");
+                } else {
+                    ElMessage.error(response.data.msg);
+                }
+            }
+        );
+    }
+};
 
-// TODO 点击获取验证码
-const getVerCode = () => {
-    ElMessage.success("验证码已发送");
+const getVerCode = (phone) => {
+    try {
+        if (checkPhone()) {
+            getVerCodeApi(phone).then((response) => {
+                if (response.data.success) {
+                    ElMessage.success("获取验证码成功");
+                    const code = response.data.data.verificationCode
+                    ElNotification({
+                        title: "验证码",
+                        message:
+                            "您的验证码是" +
+                            code +
+                            "有效期10分钟，打死也不要告诉别人哦",
+                        duration: 0,
+                    });
+                } else {
+                    ElMessage.error("获取验证码失败");
+                }
+            });
+        }
+    } catch (error) {
+        ElMessage.error("获取验证码失败");
+    }
 };
 </script>
 
 <style>
+html,
+body {
+    padding: 0;
+    margin: 0;
+}
 .occupy {
     height: 200px;
 }

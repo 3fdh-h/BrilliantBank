@@ -2,23 +2,49 @@
     <el-container>
         <el-main>
             <div class="op-result">
-                <el-avatar shape="square" :size="100" :src="avatarUrl"></el-avatar>
-                <h2>操作成功/失败</h2>
+                <el-result icon="success" :title="`${transferInfo.type} ${transferInfo.name} ${transferInfo.amount}`" :sub-title="`${transferInfo.type}成功`" />
             </div>
-            <div class="op-msg">
-                <h3>消息，例如收款人：张无忌</h3>
-            </div>
+            <el-row>
+                <span>{{transferInfo.time}}</span>
+            </el-row>
+            <el-row style="height: 5vw"></el-row>
+            <el-row>
+                <span>{{transferInfo.remarks}}</span>
+            </el-row>
         </el-main>
         <el-footer>
             <div class="back-home">
-                <el-button class="back-button" type="primary" @click="this.$router.push('/home')">返回首页</el-button>
+                <el-button class="back-button" type="primary" @click="router.push('/home')">返回首页</el-button>
             </div>
         </el-footer>
     </el-container>
 </template>
 
 <script setup>
-const avatarUrl = ''; // 这里可以放置头像的URL
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+// 路由相关
+const router = useRouter();
+const route = useRoute();
+
+// 页面信息
+const transferInfo = ref({
+    amount: "",
+    type: "",
+    name: "",
+    time: "",
+    remarks: "",
+});
+
+// 挂载时加载转账信息
+onMounted(() => {
+    transferInfo.value.amount = route.query.amount,
+    transferInfo.value.type = route.query.type,
+    transferInfo.value.name = route.query.name,
+    transferInfo.value.time = route.query.time,
+    transferInfo.value.remarks = route.query.remarks;
+});
 </script>
 
 <style scoped>

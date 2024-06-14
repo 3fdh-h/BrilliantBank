@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 //请求路径的前缀
-const baseUrl = 'https://localocalhost:8080/'
+// const baseUrl = 'https://localocalhost:8080/'
+const baseUrl = '/api'
 
 // 获取转账伙伴
 export const getPartnerApi = () => {
@@ -10,7 +11,7 @@ export const getPartnerApi = () => {
         method: "get",
         headers: {
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`,
+            'token': `${sessionStorage.getItem("token")}`,
         }
     });
 }
@@ -27,7 +28,7 @@ export const addPartnerApi = (userName, accountName) => {
         headers: {
             'Content-Type': 'application/json',
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`,
+            'token': `${sessionStorage.getItem("token")}`,
         }
     });
 }
@@ -44,7 +45,7 @@ export const deletePartnerApi = (userName, accountName) => {
         headers: {
             'Content-Type': 'application/json',
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`
+            'token': `${sessionStorage.getItem("token")}`
         }
     });
 }
@@ -57,15 +58,15 @@ export const transferOutApi = (initiateAccountName, paymentPassword, amount, rem
         data: {
             "initiateAccountName": initiateAccountName,
             "paymentPassword": paymentPassword,
-            "amount": 0,
-            "remarks": "",
-            "receiveUserName": "",
-            "receiveAccountName": ""
+            "amount": amount,
+            "remarks": remarks,
+            "receiveUserName": receiveUserName,
+            "receiveAccountName": receiveAccountName
         },
         headers: {
             'Content-Type': 'application/json',
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`
+            'token': `${sessionStorage.getItem("token")}`
         }
     })
 }
@@ -73,7 +74,7 @@ export const transferOutApi = (initiateAccountName, paymentPassword, amount, rem
 // 转账
 export const transferApi = (initiateAccountName, paymentPassword, amount, remarks, receiveAccountName) => {
     return axios({
-        url: `${baseUrl}/transaction/transfer`,
+        url: `${baseUrl}/transaction/transfer/`,
         method: "post",
         data: {
             "initiateAccountName": initiateAccountName,
@@ -85,7 +86,7 @@ export const transferApi = (initiateAccountName, paymentPassword, amount, remark
         headers: {
             'Content-Type': 'application/json',
             //加上登录令牌
-            'Bearer': `${sessionStorage.getItem("token")}`
+            'token': `${sessionStorage.getItem("token")}`
         }
     });
 }

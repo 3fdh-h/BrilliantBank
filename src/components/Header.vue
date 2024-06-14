@@ -13,7 +13,6 @@
         <el-col :span="15">
             <el-input class="search-border" placeholder="搜索交易记录">
                 <template #suffix>
-                    <!-- TODO 后续如果加搜索功能需要添加事件 -->
                     <el-icon style="font-size: 4vw;">
                         <Search />
                     </el-icon>

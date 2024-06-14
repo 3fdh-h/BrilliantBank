@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 //请求路径的前缀
-const baseUrl = 'https://localocalhost:8080/'
+// const baseUrl = 'https://localocalhost:8080/'
+const baseUrl = '/api'
+
 
 // 支付
 export const payApi = (initiateAccountName, paymentPassword, amount, remarks, receiveUserName) => {
@@ -17,6 +19,7 @@ export const payApi = (initiateAccountName, paymentPassword, amount, remarks, re
         },
         headers: {
             'Content-Type': 'application/json',
+            'token': `${sessionStorage.getItem("token")}`
         }
     })
 }

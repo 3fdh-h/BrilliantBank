@@ -3,8 +3,8 @@
         <el-col :span="1">
         </el-col>
         <el-col :span="4" class="logo-container">
-            <div>
-                <img class="func-logo" src="../assets/icons/存款.png" alt="" style="width: 90%; height: auto;">
+            <div @click="toSaving()">
+                <img class="func-logo" src="../assets/icons/saving.png" alt="" style="width: 90%; height: auto;">
                 <span>存款</span>
             </div>
         </el-col>
@@ -12,8 +12,8 @@
 
         </el-col>
         <el-col :span="4" class="logo-container">
-            <div>
-                <img class="func-logo" src="../assets/icons/付款.png" alt="" style="width: 90%; height: auto;">
+            <div @click="toPayment()">
+                <img class="func-logo" src="../assets/icons/payment.png" alt="" style="width: 90%; height: auto;">
                 <span>付款</span>
             </div>
         </el-col>
@@ -21,8 +21,8 @@
 
         </el-col>
         <el-col :span="4" class="logo-container">
-            <div>
-                <img class="func-logo" src="../assets/icons/转账.png" alt="" style="width: 90%; height: auto;">
+            <div @click="toTransfer()">
+                <img class="func-logo" src="../assets/icons/transfer.png" alt="" style="width: 90%; height: auto;">
                 <span>转账</span>
             </div>
         </el-col>
@@ -30,8 +30,8 @@
 
         </el-col>
         <el-col :span="4" class="logo-container">
-            <div>
-                <img class="func-logo" src="../assets/icons/账户管理.png" alt="" style="width: 90%; height: auto;">
+            <div @click="toAccountManage()">
+                <img class="func-logo" src="../assets/icons/accountManage.png" alt="" style="width: 90%; height: auto;">
                 <span>账户管理</span>
             </div>
         </el-col>
@@ -39,6 +39,28 @@
 </template>
 
 <script setup>
+import {useRouter} from "vue-router";
+const router = useRouter();
+
+// 跳转支付
+const toPayment = () => {
+    router.push("/payment");
+}
+
+// 跳转存款
+const toSaving = () => {
+    router.push("/saving");
+}
+
+// 跳转转账
+const toTransfer = () => {
+    router.push("/transfer");
+}
+
+// 跳转账户管理
+const toAccountManage = () => {
+    router.push("/accountmanage");
+}
 </script>
 
 <style scoped>

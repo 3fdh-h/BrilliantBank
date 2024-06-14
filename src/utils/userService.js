@@ -2,10 +2,11 @@
 import axios from 'axios'
 
 //请求路径的前缀
-const baseUrl = 'https://localocalhost:8080/'
+// const baseUrl = 'http://localhost:8080'
+const baseUrl = '/api'
 
 // 注册接口
-export const regAPi = (name, gender, phone, verificationCode, loginPassword) => {
+export const regApi = (name, gender, phone, verificationCode, loginPassword) => {
 	return axios({
 		url: `${baseUrl}/user/register`,
 		method: "post",
@@ -25,7 +26,7 @@ export const regAPi = (name, gender, phone, verificationCode, loginPassword) => 
 // 登录接口
 export const loginApi = (phone, loginPassword) => {
 	return axios({
-		url: `${baseUrl}/user/login`,
+		url: `/api/user/login`,
 		method: "post",
 		data: {
 			"phone": phone,
@@ -37,15 +38,15 @@ export const loginApi = (phone, loginPassword) => {
 	});
 }
 // 获取验证码接口
-export const getVerCode = (phone) => {
+export const getVerCodeApi = (phone) => {
 	return axios({
 		url: `${baseUrl}/user/verificationcode`,
 		method: 'get',
-		data: {
-			"phone": phone
-		},
 		headers: {
 			'Content-Type': 'application/json',
+		},
+		params: {
+			"phone": phone
 		}
 	})
 }
@@ -54,13 +55,14 @@ export const getVerCode = (phone) => {
 export const changePayPwdApi = (paymentPassword, newPaymentPassword) => {
 	return axios({
 		url: `${baseUrl}/user/paymentPassword`,
-		method: "post",
+		method: "put",
 		data: {
 			"paymentPassword": paymentPassword,
 			"newPaymentPassword": newPaymentPassword
 		},
 		headers: {
 			'Content-Type': 'application/json',
+			'token': `${sessionStorage.getItem("token")}`
 		}
 	})
 }
@@ -81,18 +83,19 @@ export const changeLoginPwdApi = (loginPassword, newLoginPassword) => {
 }
 
 // 修改头像
-export const changeAvatarApi = (avatar) => {
+export const changeAvatarApi = (file) => {
 	return axios({
 		url: `${baseUrl}/user/avatar`,
 		method: "post",
-		data: {
-			"avatar": avatar
-		},
+		data: file,
 		headers: {
 			'Content-Type': 'multipart/form-data',
+			'token': `${sessionStorage.getItem("token")}`
 		}
 	})
 }
+  
+
 // 获取个人信息
 export const getPersonInfoApi = () => {
 	return axios({
@@ -100,7 +103,7 @@ export const getPersonInfoApi = () => {
 		method: "get",
 		headers: {
 			//加上登录令牌
-			'Bearer': `${sessionStorage.getItem("token")}`,
+			'token': `${sessionStorage.getItem("token")}`,
 		}
 	});
 }

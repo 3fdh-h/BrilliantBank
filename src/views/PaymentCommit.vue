@@ -119,6 +119,7 @@ const transfer_confirm = () => {
         transfer_info.value.give_account,
         pay_pwd.value,
         transfer_info.value.amount,
+        transfer_info.value.commerce,
         transfer_info.value.receive_name
     ).then((response) => {
         if (response.data.success) {

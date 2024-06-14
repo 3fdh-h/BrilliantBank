@@ -4,7 +4,7 @@
             <el-header style="padding:0;margin:0">
                 <div class="user-avatar">
                     <el-upload class="avatar-uploader" action="http://localhost:3000/api/user/avatar" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload"
-                        :headers=uploadHeaders accept="image/jpeg,image/png,image/gif">
+                        :headers=uploadHeaders>
                         <img v-if="imageUrl" :src="imageUrl" class="avatar" />
                         <el-icon v-else class="avatar-uploader-icon">
                             <Plus />
@@ -77,7 +77,7 @@
                     <el-input v-model="updateLogin.newPwd" placeholder="请输入新的密码" type="password" show-password @blur="checkLoginPwd(updateLogin.newPwd)" />
                 </el-form-item>
                 <el-form-item label="确认密码" :label-width="formLabelWidth">
-                    <el-input v-model="updateLogin.newPwd2" placeholder="请重新输入新的密码" type="password" show-password @blur="checkSame(updateLogin.newPwdm, updateLogin.newPwd2)" />
+                    <el-input v-model="updateLogin.newPwd2" placeholder="请重新输入新的密码" type="password" show-password @blur="checkSame(updateLogin.newPwd, updateLogin.newPwd2)" />
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -150,7 +150,7 @@ const handleAvatarSuccess = (response, uploadFile) => {
 
 const beforeAvatarUpload = (rawFile) => {
     if (rawFile.type !== "image/jpeg") {
-        ElMessage.error("头像必须为jpg/png/gif格式");
+        ElMessage.error("头像必须为jpg格式");
         return false;
     } else if (rawFile.size / 1024 / 1024 > 2) {
         ElMessage.error("头像大小不超过2MB");

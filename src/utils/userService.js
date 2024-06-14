@@ -71,13 +71,14 @@ export const changePayPwdApi = (paymentPassword, newPaymentPassword) => {
 export const changeLoginPwdApi = (loginPassword, newLoginPassword) => {
 	return axios({
 		url: `${baseUrl}/user/loginPassword`,
-		method: "post",
+		method: "put",
 		data: {
 			"loginPassword": loginPassword,
 			"newLoginPassword": newLoginPassword
 		},
 		headers: {
 			'Content-Type': 'application/json',
+			'token': `${sessionStorage.getItem("token")}`
 		}
 	})
 }
